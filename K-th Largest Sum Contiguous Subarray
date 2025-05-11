@@ -1,0 +1,35 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+class Solution {
+public:
+    int kthLargest(vector<int> &arr, int k) {
+        int n = arr.size();
+        priority_queue<int, vector<int>, greater<int>> minHeap;
+
+        // Iterate over all starting points of subarrays
+        for (int start = 0; start < n; ++start) {
+            int currentSum = 0;
+            // Generate subarrays starting from 'start'
+            for (int end = start; end < n; ++end) {
+                currentSum += arr[end];  // Add current element to sum
+
+                // Maintain the heap with the K largest sums
+                if (minHeap.size() < k) {
+                    minHeap.push(currentSum);
+                } else if (currentSum > minHeap.top()) {
+                    minHeap.pop();
+                    minHeap.push(currentSum);
+                }
+            }
+        }
+
+        // The root of the min-heap will be the K-th largest sum
+        return minHeap.top();
+    }
+};
+
+
