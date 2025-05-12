@@ -1,0 +1,59 @@
+// User function Template for C++
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+class Solution {
+public:
+    int mostBooked(int n, vector<vector<int>> &meetings) {
+        sort(meetings.begin(), meetings.end());
+        
+        priority_queue<int, vector<int>, greater<int>> free_rooms;
+        for (int i = 0; i < n; i++) {
+            free_rooms.push(i);
+        }
+        
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> busy_rooms;
+        
+        vector<int> meeting_count(n, 0);
+        
+        for (int i = 0; i < meetings.size(); ++i) {
+            long long start = meetings[i][0];
+            long long end = meetings[i][1];
+            
+            // Free up rooms that are now available
+            while (!busy_rooms.empty() && busy_rooms.top().first <= start) {
+                int room_id = busy_rooms.top().second;
+                busy_rooms.pop();
+                free_rooms.push(room_id);
+            }
+            
+            if (!free_rooms.empty()) {
+                int room_id = free_rooms.top();
+                free_rooms.pop();
+                meeting_count[room_id]++;
+                busy_rooms.push(make_pair(end, room_id));
+            } else {
+                // Delay the meeting
+                pair<long long, int> earliest = busy_rooms.top();
+                busy_rooms.pop();
+                long long new_end = earliest.first + (end - start);
+                meeting_count[earliest.second]++;
+                busy_rooms.push(make_pair(new_end, earliest.second));
+            }
+        }
+        
+        int max_meetings = 0;
+        int result_room = 0;
+        for (int i = 0; i < n; ++i) {
+            if (meeting_count[i] > max_meetings || 
+                (meeting_count[i] == max_meetings && i < result_room)) {
+                max_meetings = meeting_count[i];
+                result_room = i;
+            }
+        }
+        
+        return result_room;
+    }
+};
